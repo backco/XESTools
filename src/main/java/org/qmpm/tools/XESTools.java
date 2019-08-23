@@ -56,9 +56,9 @@ import org.deckfour.xes.out.XesXmlSerializer;
 
 public class XESTools {
 
-	private static final String	CONCEPTNAME	= "concept:name";
-	private final static String	ERROR		= "[ERROR (" + XESTools.class.getName() + ")]: ";
-	private static final String	TIMESTAMP	= "time:timestamp";
+	public static final String	CONCEPTNAME	= "concept:name";
+	public static final String	TIMESTAMP	= "time:timestamp";
+	public final static String	ERROR		= "[ERROR (" + XESTools.class.getName() + ")]: ";
 
 	public static boolean canParse(String path) throws IOException {
 
@@ -260,9 +260,53 @@ public class XESTools {
 		l.sort((x, y) -> LocalDateTime.parse(x.get(0).getAttributes().get(TIMESTAMP).toString(), DateTimeFormatter.ISO_OFFSET_DATE_TIME).compareTo(LocalDateTime.parse(y.get(0).getAttributes().get(TIMESTAMP).toString(), DateTimeFormatter.ISO_OFFSET_DATE_TIME)));
 	}
 
+	public static void sortByTimeStampAndEventClass(XLog l, List<String> ordering) {
+
+		for (final XTrace t : l) {
+			sortByTimeStampAndEventClass(t, ordering);
+		}
+
+		l.sort((x, y) -> LocalDateTime.parse(x.get(0).getAttributes().get(TIMESTAMP).toString(), DateTimeFormatter.ISO_OFFSET_DATE_TIME).compareTo(LocalDateTime.parse(y.get(0).getAttributes().get(TIMESTAMP).toString(), DateTimeFormatter.ISO_OFFSET_DATE_TIME)));
+	}
+
 	public static void sortByTimeStamp(XTrace t) {
 
 		t.sort((x, y) -> LocalDateTime.parse(x.getAttributes().get(TIMESTAMP).toString(), DateTimeFormatter.ISO_OFFSET_DATE_TIME).compareTo(LocalDateTime.parse(y.getAttributes().get(TIMESTAMP).toString(), DateTimeFormatter.ISO_OFFSET_DATE_TIME)));
+	}
+
+	public static void sortByTimeStampAndEventClass(XTrace t, List<String> ordering) {
+
+		t.sort((x, y) -> compareByTimeStamp(x, y) != 0 ? compareByTimeStamp(x, y) : compareByEventClass(x, y, ordering));
+	}
+
+	private static int compareByTimeStamp(XEvent x, XEvent y) {
+
+		return LocalDateTime.parse(x.getAttributes().get(TIMESTAMP).toString(), DateTimeFormatter.ISO_OFFSET_DATE_TIME).compareTo(LocalDateTime.parse(y.getAttributes().get(TIMESTAMP).toString(), DateTimeFormatter.ISO_OFFSET_DATE_TIME));
+	}
+
+	private static int compareByEventClass(XEvent x, XEvent y, List<String> ordering) {
+
+		Integer xIdx = ordering.indexOf(x.getAttributes().get(CONCEPTNAME).toString());
+		Integer yIdx = ordering.indexOf(y.getAttributes().get(CONCEPTNAME).toString());
+
+		if (xIdx < 0 || yIdx < 0) {
+
+			String missing = "";
+
+			if (xIdx < 0) {
+				missing += "'" + x.getAttributes().get(CONCEPTNAME).toString() + "'";
+			}
+			if (yIdx < 0) {
+				missing += missing == "" ? "" : " and ";
+				missing += "'" + y.getAttributes().get(CONCEPTNAME).toString() + "'";
+			}
+
+			throw new IndexOutOfBoundsException(ERROR + " missing event class(es) for comparision (" + missing + ") in provided ordering: " + ordering);
+
+		} else {
+
+			return ((Integer) ordering.indexOf(x.getAttributes().get(CONCEPTNAME).toString())).compareTo(ordering.indexOf(y.getAttributes().get(CONCEPTNAME).toString()));
+		}
 	}
 
 	public static XTrace toXtrace(List<Object> lblTrace, XFactory xFactory) {
@@ -313,6 +357,18 @@ public class XESTools {
 			return xa.toString();
 		} else {
 			throw new IOException(ERROR + " cannot find '" + CONCEPTNAME + "' entry for XEvent");
+		}
+	}
+
+	public static String xEventTimeStamp(XEvent event) throws IOException {
+
+		final XAttributeMap xaMap = event.getAttributes();
+
+		if (xaMap.containsKey(CONCEPTNAME)) {
+			final XAttribute xa = xaMap.get(TIMESTAMP);
+			return xa.toString();
+		} else {
+			throw new IOException(ERROR + " cannot find '" + TIMESTAMP + "' entry for XEvent");
 		}
 	}
 
