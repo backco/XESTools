@@ -27,9 +27,10 @@ package org.qmpm.tools;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
+import java.io.OutputStream;
 import java.io.PrintStream;
 import java.time.Instant;
-import java.time.LocalDateTime;
+import java.time.ZonedDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.Date;
@@ -59,6 +60,13 @@ public class XESTools {
 	public static final String	CONCEPTNAME	= "concept:name";
 	public static final String	TIMESTAMP	= "time:timestamp";
 	public final static String	ERROR		= "[ERROR (" + XESTools.class.getName() + ")]: ";
+
+	public static void write(XLog log, OutputStream os) throws IOException {
+
+		XesXmlSerializer ser = new XesXmlSerializer();
+
+		ser.serialize(log, os);
+	}
 
 	public static boolean canParse(String path) throws IOException {
 
@@ -103,7 +111,7 @@ public class XESTools {
 		}
 
 		for (int i = 0; i < l.size() - 1; i++) {
-			if (0 < LocalDateTime.parse(l.get(i).get(0).getAttributes().get(TIMESTAMP).toString(), DateTimeFormatter.ISO_OFFSET_DATE_TIME).compareTo(LocalDateTime.parse(l.get(i + 1).get(0).getAttributes().get(TIMESTAMP).toString(), DateTimeFormatter.ISO_OFFSET_DATE_TIME))) {
+			if (0 < ZonedDateTime.parse(l.get(i).get(0).getAttributes().get(TIMESTAMP).toString(), DateTimeFormatter.ISO_OFFSET_DATE_TIME).compareTo(ZonedDateTime.parse(l.get(i + 1).get(0).getAttributes().get(TIMESTAMP).toString(), DateTimeFormatter.ISO_OFFSET_DATE_TIME))) {
 				return false;
 			}
 		}
@@ -114,7 +122,7 @@ public class XESTools {
 	public static boolean isSorted(XTrace t) {
 
 		for (int i = 0; i < t.size() - 1; i++) {
-			if (0 < LocalDateTime.parse(t.get(i).getAttributes().get(TIMESTAMP).toString(), DateTimeFormatter.ISO_OFFSET_DATE_TIME).compareTo(LocalDateTime.parse(t.get(i + 1).getAttributes().get(TIMESTAMP).toString(), DateTimeFormatter.ISO_OFFSET_DATE_TIME))) {
+			if (0 < ZonedDateTime.parse(t.get(i).getAttributes().get(TIMESTAMP).toString(), DateTimeFormatter.ISO_OFFSET_DATE_TIME).compareTo(ZonedDateTime.parse(t.get(i + 1).getAttributes().get(TIMESTAMP).toString(), DateTimeFormatter.ISO_OFFSET_DATE_TIME))) {
 				return false;
 			}
 		}
@@ -257,7 +265,7 @@ public class XESTools {
 			sortByTimeStamp(t);
 		}
 
-		l.sort((x, y) -> LocalDateTime.parse(x.get(0).getAttributes().get(TIMESTAMP).toString(), DateTimeFormatter.ISO_OFFSET_DATE_TIME).compareTo(LocalDateTime.parse(y.get(0).getAttributes().get(TIMESTAMP).toString(), DateTimeFormatter.ISO_OFFSET_DATE_TIME)));
+		l.sort((x, y) -> ZonedDateTime.parse(x.get(0).getAttributes().get(TIMESTAMP).toString()).compareTo(ZonedDateTime.parse(y.get(0).getAttributes().get(TIMESTAMP).toString())));
 	}
 
 	public static void sortByTimeStampAndEventClass(XLog l, List<String> ordering) {
@@ -266,12 +274,12 @@ public class XESTools {
 			sortByTimeStampAndEventClass(t, ordering);
 		}
 
-		l.sort((x, y) -> LocalDateTime.parse(x.get(0).getAttributes().get(TIMESTAMP).toString(), DateTimeFormatter.ISO_OFFSET_DATE_TIME).compareTo(LocalDateTime.parse(y.get(0).getAttributes().get(TIMESTAMP).toString(), DateTimeFormatter.ISO_OFFSET_DATE_TIME)));
+		l.sort((x, y) -> ZonedDateTime.parse(x.get(0).getAttributes().get(TIMESTAMP).toString()).compareTo(ZonedDateTime.parse(y.get(0).getAttributes().get(TIMESTAMP).toString())));
 	}
 
 	public static void sortByTimeStamp(XTrace t) {
 
-		t.sort((x, y) -> LocalDateTime.parse(x.getAttributes().get(TIMESTAMP).toString(), DateTimeFormatter.ISO_OFFSET_DATE_TIME).compareTo(LocalDateTime.parse(y.getAttributes().get(TIMESTAMP).toString(), DateTimeFormatter.ISO_OFFSET_DATE_TIME)));
+		t.sort((x, y) -> ZonedDateTime.parse(x.getAttributes().get(TIMESTAMP).toString()).compareTo(ZonedDateTime.parse(y.getAttributes().get(TIMESTAMP).toString())));
 	}
 
 	public static void sortByTimeStampAndEventClass(XTrace t, List<String> ordering) {
@@ -281,7 +289,7 @@ public class XESTools {
 
 	private static int compareByTimeStamp(XEvent x, XEvent y) {
 
-		return LocalDateTime.parse(x.getAttributes().get(TIMESTAMP).toString(), DateTimeFormatter.ISO_OFFSET_DATE_TIME).compareTo(LocalDateTime.parse(y.getAttributes().get(TIMESTAMP).toString(), DateTimeFormatter.ISO_OFFSET_DATE_TIME));
+		return ZonedDateTime.parse(x.getAttributes().get(TIMESTAMP).toString()).compareTo(ZonedDateTime.parse(y.getAttributes().get(TIMESTAMP).toString()));
 	}
 
 	private static int compareByEventClass(XEvent x, XEvent y, List<String> ordering) {

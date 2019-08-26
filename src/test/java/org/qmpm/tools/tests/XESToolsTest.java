@@ -5,6 +5,7 @@
 package org.qmpm.tools.tests;
 
 import java.io.File;
+import java.io.FileOutputStream;
 import java.io.IOException;
 import java.util.Arrays;
 
@@ -43,7 +44,7 @@ class XESToolsTest {
 	@Test
 	void sortTest() throws IOException {
 
-		XESTools.sortByTimeStampAndEventClass(logSort, Arrays.asList("A", "C"));
+		XESTools.sortByTimeStampAndEventClass(logSort, Arrays.asList("A", "B", "C"));
 
 		for (XTrace t : logSort) {
 
@@ -53,6 +54,12 @@ class XESToolsTest {
 
 			System.out.println("");
 		}
+	}
+
+	@Test
+	void serializeTest() throws IOException {
+
+		XESTools.write(logSort, new FileOutputStream("test.xes"));
 	}
 
 }

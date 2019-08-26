@@ -45,16 +45,16 @@
 	</trace>
 	<trace>
 		<event>
-			<string key="concept:name" value="B"/>
-			<date key="time:timestamp" value="2019-01-02T00:00:00+00:00"/>
-		</event>
-		<event>
 			<string key="concept:name" value="A"/>
 			<date key="time:timestamp" value="2019-01-01T23:00:00+00:00"/>
 		</event>
 		<event>
 			<string key="concept:name" value="C"/>
 			<date key="time:timestamp" value="2019-01-01T23:30:00+00:00"/>
+		</event>
+		<event>
+			<string key="concept:name" value="B"/>
+			<date key="time:timestamp" value="2019-01-02T00:00:00+00:00"/>
 		</event>
 		<event>
 			<string key="concept:name" value="A"/>
