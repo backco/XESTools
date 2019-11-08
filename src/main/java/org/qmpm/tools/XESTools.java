@@ -268,10 +268,10 @@ public class XESTools {
 		l.sort((x, y) -> ZonedDateTime.parse(x.get(0).getAttributes().get(TIMESTAMP).toString()).compareTo(ZonedDateTime.parse(y.get(0).getAttributes().get(TIMESTAMP).toString())));
 	}
 
-	public static void sortByTimeStampAndEventClass(XLog l, List<String> ordering) {
+	public static void sortByTimeStampAndEventClass(XLog l, List<String> ordering, boolean verbose) {
 
 		for (final XTrace t : l) {
-			sortByTimeStampAndEventClass(t, ordering);
+			sortByTimeStampAndEventClass(t, ordering, verbose);
 		}
 
 		l.sort((x, y) -> ZonedDateTime.parse(x.get(0).getAttributes().get(TIMESTAMP).toString()).compareTo(ZonedDateTime.parse(y.get(0).getAttributes().get(TIMESTAMP).toString())));
@@ -282,9 +282,31 @@ public class XESTools {
 		t.sort((x, y) -> ZonedDateTime.parse(x.getAttributes().get(TIMESTAMP).toString()).compareTo(ZonedDateTime.parse(y.getAttributes().get(TIMESTAMP).toString())));
 	}
 
-	public static void sortByTimeStampAndEventClass(XTrace t, List<String> ordering) {
+	public static void sortByTimeStampAndEventClass(XTrace t, List<String> ordering, boolean verbose) {
 
-		t.sort((x, y) -> compareByTimeStamp(x, y) != 0 ? compareByTimeStamp(x, y) : compareByEventClass(x, y, ordering));
+		t.sort((x, y) -> {
+			int result = compareByTimeStamp(x, y);
+			if (result != 0) {
+				return result;
+			} else {
+				if (verbose) {
+					String xName;
+					String yName;
+					try {
+						xName = xEventName(x);
+					} catch (IOException e) {
+						xName = "ERROR";
+					}
+					try {
+						yName = xEventName(y);
+					} catch (IOException e) {
+						yName = "ERROR";
+					}
+					System.out.println(xName + " and " + yName + " have identical timestamps, they will be sorted according to the given secondary ordering instead.");
+				}
+				return compareByEventClass(x, y, ordering);
+			}
+		});
 	}
 
 	private static int compareByTimeStamp(XEvent x, XEvent y) {

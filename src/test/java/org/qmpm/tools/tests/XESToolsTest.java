@@ -44,7 +44,7 @@ class XESToolsTest {
 	@Test
 	void sortTest() throws IOException {
 
-		XESTools.sortByTimeStampAndEventClass(logSort, Arrays.asList("A", "B", "C"));
+		XESTools.sortByTimeStampAndEventClass(logSort, Arrays.asList("A", "B", "C"), true);
 
 		for (XTrace t : logSort) {
 
